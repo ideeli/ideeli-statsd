@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'bundler/setup'
+require 'statsd'
 
 module IdeeliStatsd
   class Stat
@@ -11,8 +12,8 @@ module IdeeliStatsd
           statsd.namespace = ns
           statsd.__send__(meth, *args)
         end
-      rescue
-        # ignore errors
+      rescue Exception => e
+        $stderr.puts 'error: ' + e.message
       end
 
       def statsd
