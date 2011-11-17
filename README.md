@@ -1,6 +1,6 @@
 # Ideeli Statsd
 
-Log stats via statsd duplicated in various namespaces.
+Log stats via statsd, duplicated in various namespaces.
 
 ## Installation
 
@@ -17,21 +17,32 @@ Add to `config/environment.rb`:
     # optionally
     IdeeliStatsd::Client.configure do |conf|
       conf.host = 'statsd.ideeli.com'
-      conf.port = 8125
+
+      # There will be default namespaces derived from the environment 
+      # but you can also manipulate this array via the configure block
       conf.namespaces << RAILS_ENV
     end
 
 Log metrics:
 
-    def index
-      IdeeliStatsd::Client.increment "index_viewed" 
+    def place_order
+      IdeeliStatsd::Client.increment "orders_placed" 
 
       # ...
+
+    end
+
+    def some_long_query
+      IdeeliStatsd::Client.time "my_query" do
+
+        # ...
+
+      end
     end
 
 ### Commandline
 
-    statsd-client increment "deployment"
+    $ STATSD_HOST='statsd.ideeli.com' statsd-client increment "deployment"
 
 ## Actions
 
@@ -43,5 +54,15 @@ All actions supported by [statsd][] have corresponding methods on the
 ## Namespacing
 
 When a metric is logged, it is logged in various namespaces determined 
-by the environment; this is in addition to any namepaces added during 
-`configure`.
+by the environment; this is in addition to any use-specific namepaces 
+added during `configure`.
+
+## Configuration
+
+The default options are to log metrics to `localhost:8125`, log errors 
+to `$stderr` and duplicate metrics in the various environment-specific 
+namespaces as defined by ideeli ops.
+
+All of these can be adjusted through the `configure` method in the case 
+of the library and the environment variables `STATSD_HOST` and 
+`STATSD_PORT` can be used in the case of the commandline app.
