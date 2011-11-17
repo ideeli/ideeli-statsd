@@ -10,6 +10,8 @@ module IdeeliStatsd
       @namespaces ||= []
     end
 
+    private_class_method :new
+
     def self.defaults
       options = new
       options.host = 'localhost'
