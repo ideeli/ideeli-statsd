@@ -40,7 +40,6 @@ module IdeeliStatsd
       end
 
       def configure(&block)
-        @@options = Options.defaults
         yield @@options
       end
 
