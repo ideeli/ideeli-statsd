@@ -4,7 +4,7 @@ require "ideeli-statsd/version"
 
 Gem::Specification.new do |s|
   s.name        = "ideeli-statsd"
-  s.version     = Ideeli::Statsd::VERSION
+  s.version     = IdeeliStatsd::VERSION
   s.authors     = ["patrick brisbin"]
   s.email       = ["pbrisbin@ideeli.com"]
   s.homepage    = "http://github.com/ideeli/ideeli-statsd"
