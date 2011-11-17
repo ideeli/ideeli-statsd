@@ -4,34 +4,50 @@ require 'statsd'
 
 module IdeeliStatsd
   class Stat
-    @@statsd = nil
-
     class << self
+      # Pass on any method calls to the statsd object. Errors are
+      # silently ignored.
       def method_missing(meth, *args)
         namespaces.each do |ns|
           statsd.namespace = ns
           statsd.__send__(meth, *args)
         end
       rescue Exception => e
-        $stderr.puts 'error: ' + e.message
+        logger.debug "statsd error: #{e.message}" if logger
       end
 
-      def statsd
-        @@statsd ||= Statsd.new(host, port)
+      def namespaces
+        @@namespaces ||= [nil]
+      end
+
+      def host
+        @@host ||= 'localhost'
+      end
+
+      def port
+        @@port ||= 8215
+      end
+
+      def host=(h)
+        @@host = h
+      end
+
+      def port=(p)
+        @@port = p
+      end
+
+      def logger
+        @@logger ||= nil
+      end
+
+      def logger=(l)
+        @@logger = l
       end
 
       private
 
-      def host
-        'localhost' # TODO app config?
-      end
-
-      def port
-        8125 # TODO app config?
-      end
-
-      def namespaces
-        [nil] # TODO
+      def statsd
+        @@statsd ||= Statsd.new(host, port)
       end
     end
   end
