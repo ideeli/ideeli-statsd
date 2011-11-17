@@ -3,45 +3,51 @@ require 'bundler/setup'
 require 'statsd'
 
 module IdeeliStatsd
-  class Stat
+  class Options
+    attr_accessor :host, :port, :logger
+
+    def namespaces
+      @namespaces ||= []
+    end
+
+    def self.defaults
+      options = new
+      options.host = 'localhost'
+      options.port = 8125
+      options.namespaces << nil
+
+      options
+    end
+  end
+
+  class Client
     private_class_method :new
 
+    @@options = Options.defaults
+
     class << self
-      # Pass on any method calls to the statsd object. Errors are
-      # silently ignored.
       def method_missing(meth, *args)
-        namespaces.each do |ns|
+        @@options.namespaces.each do |ns|
           statsd.namespace = ns
           statsd.__send__(meth, *args)
         end
       rescue Exception => e
-        $stderr.puts "statsd error: #{e.message}"
+        if logger = @@options.logger
+          logger.debug "statsd error: #{e.message}"
+        else
+          $stderr.puts "statsd error: #{e.message}"
+        end
       end
 
-      def namespaces
-        @@namespaces ||= [nil]
-      end
-
-      def host
-        @@host ||= 'localhost'
-      end
-
-      def port
-        @@port ||= 8125
-      end
-
-      def host=(h)
-        @@host = h
-      end
-
-      def port=(p)
-        @@port = p
+      def configure(&block)
+        @@options = Options.defaults
+        yield @@options
       end
 
       private
 
       def statsd
-        @@statsd ||= Statsd.new(host, port)
+        @@statsd ||= Statsd.new(@@options.host, @@options.port)
       end
     end
   end
