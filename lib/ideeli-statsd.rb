@@ -4,6 +4,8 @@ require 'statsd'
 
 module IdeeliStatsd
   class Stat
+    private_class_method :new
+
     class << self
       # Pass on any method calls to the statsd object. Errors are
       # silently ignored.
@@ -13,7 +15,7 @@ module IdeeliStatsd
           statsd.__send__(meth, *args)
         end
       rescue Exception => e
-        logger.debug "statsd error: #{e.message}" if logger
+        $stderr.puts "statsd error: #{e.message}"
       end
 
       def namespaces
@@ -25,7 +27,7 @@ module IdeeliStatsd
       end
 
       def port
-        @@port ||= 8215
+        @@port ||= 8125
       end
 
       def host=(h)
@@ -34,14 +36,6 @@ module IdeeliStatsd
 
       def port=(p)
         @@port = p
-      end
-
-      def logger
-        @@logger ||= nil
-      end
-
-      def logger=(l)
-        @@logger = l
       end
 
       private
