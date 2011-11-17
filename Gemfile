@@ -1,1 +1,1 @@
-gem "statsd-ruby", :git => "https://github.com/reinh/statsd.git"
+gem "statsd-ruby", :git => "https://github.com/github/statsd-ruby.git"
