@@ -33,11 +33,11 @@ module IdeeliStatsd
           statsd.namespace = ns
           statsd.__send__(meth, *args)
         end
-      rescue Exception => e
+      rescue Exception => ex
         if logger = @@options.logger
-          logger.debug "statsd error: #{e.message}"
+          logger.debug "statsd error: #{ex}"
         else
-          $stderr.puts "statsd error: #{e.message}"
+          $stderr.puts "statsd error: #{ex}"
         end
       end
 
