@@ -24,10 +24,10 @@ def main
   [2, 3].each { |i| ARGV[i] = ARGV[i].to_i if ARGV[i] }
 
   case action = ARGV.shift
-  when 'increment'; IdeeliStatsd::Stat.send(action.to_sym, *ARGV)
-  when 'decrement'; IdeeliStatsd::Stat.send(action.to_sym, *ARGV)
-  when 'count'    ; IdeeliStatsd::Stat.send(action.to_sym, *ARGV)
-  when 'timing'   ; IdeeliStatsd::Stat.send(action.to_sym, *ARGV)
+  when 'increment'; IdeeliStatsd::Client.send(action.to_sym, *ARGV)
+  when 'decrement'; IdeeliStatsd::Client.send(action.to_sym, *ARGV)
+  when 'count'    ; IdeeliStatsd::Client.send(action.to_sym, *ARGV)
+  when 'timing'   ; IdeeliStatsd::Client.send(action.to_sym, *ARGV)
   else raise ArgumentError, "Invalid action: #{action}"
   end
 rescue ArgumentError => e
@@ -35,6 +35,11 @@ rescue ArgumentError => e
   usage
 rescue => e
   puts e
+end
+
+IdeeliStatsd::Client.configure do |conf|
+  conf.host = ENV['STATSD_HOST'] if ENV['STATSD_HOST']
+  conf.port = ENV['STATSD_PORT'] if ENV['STATSD_PORT']
 end
 
 main
