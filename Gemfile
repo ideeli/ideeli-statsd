@@ -1,1 +1,2 @@
-gem "statsd-ruby", :git => "https://github.com/reinh/statsd.git"
+source "http://rubygems.org"
+gem "statsd-ruby"
