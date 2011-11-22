@@ -1,2 +1,4 @@
 source "http://rubygems.org"
-gem "statsd-ruby"
+
+# Specify your gem's dependencies in ideeli-statsd.gemspec
+gemspec
