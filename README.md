@@ -1,10 +1,13 @@
 # Ideeli Statsd
 
-Log stats via statsd, duplicated in various namespaces.
+This gem centralizes additional logic around metrics logging via statsd. 
+Emphasis is on namespace management for metrics coming from (rails) 
+applications and periodic "events" like deployments and outages (logged 
+via a commandline client).
 
 ## Installation
 
-    git clone https://github.com/...
+    git clone https://github.com/ideeli/ideeli-statsd
     bundle install
     rake install
 
@@ -12,28 +15,34 @@ Log stats via statsd, duplicated in various namespaces.
 
 Add to `config/environment.rb`:
 
-    require 'ideeli-statsd'
+    require 'ideeli/statsd'
 
-    # optionally
-    IdeeliStatsd::Client.configure do |conf|
+    Ideeli::Statsd::Client.configure do |conf|
       conf.host = 'statsd.ideeli.com'
+      conf.logger = Rails.logger
 
-      # There will be default namespaces derived from the environment 
-      # but you can also manipulate this array via the configure block
-      conf.namespaces << RAILS_ENV
+      # derive a specific and aggregate namespace from the environment 
+      # the rails app is running in
+
+      node_type   = 'www'
+      fqdn        = Socket.gethostbyname(Socket.gethostname).first rescue nil
+      application = "ideeli_#{Rails.env}" rescue nil
+
+      namespaces << [node_type, 'host', fqdn, application].compact.join('.')
+      namespaces << [node_type, 'app', application].compact.join('.')
     end
 
 Log metrics:
 
     def place_order
-      IdeeliStatsd::Client.increment "orders_placed" 
+      Ideeli::Statsd::Client.increment "orders.placed"
 
       # ...
 
     end
 
     def some_long_query
-      IdeeliStatsd::Client.time "my_query" do
+      Ideeli::Statsd::Client.time "my_query" do
 
         # ...
 
@@ -42,7 +51,8 @@ Log metrics:
 
 ### Commandline
 
-    $ STATSD_HOST='statsd.ideeli.com' statsd-client increment "deployment"
+    $ STATSD_HOST='statsd.ideeli.com' NODE_TYPE='www' RAILS_ENV='production' \
+        statsd-client increment deployment
 
 ## Actions
 
@@ -50,19 +60,3 @@ All actions supported by [statsd][] have corresponding methods on the
 `Client` class and arguments for the commandline client.
 
 [statsd]: https://github.com/github/statsd-ruby/blob/master/lib/statsd.rb
-
-## Namespacing
-
-When a metric is logged, it is logged in various namespaces determined 
-by the environment; this is in addition to any use-specific namepaces 
-added during `configure`.
-
-## Configuration
-
-The default options are to log metrics to `localhost:8125`, log errors 
-to `$stderr` and duplicate metrics in the various environment-specific 
-namespaces as defined by ideeli ops.
-
-All of these can be adjusted through the `configure` method in the case 
-of the library and the environment variables `STATSD_HOST` and 
-`STATSD_PORT` can be used in the case of the commandline app.
