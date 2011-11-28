@@ -61,7 +61,7 @@ Ideeli::Statsd::Client.configure do |conf|
   #
   application = ENV['RAILS_ENV'] ? "ideeli_#{ENV['RAILS_ENV']}" : 'event'
 
-  conf.namespaces << [ENV['NODE_TYPE'], app, application].compact.join('.')
+  conf.namespaces << [ENV['NODE_TYPE'], application].compact.join('.')
 end
 
 main
