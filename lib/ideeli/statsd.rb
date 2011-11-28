@@ -15,7 +15,6 @@ module Ideeli
         options = new
         options.host = 'localhost'
         options.port = 8125
-        options.namespaces << nil
 
         options
       end
@@ -28,9 +27,15 @@ module Ideeli
 
       class << self
         def method_missing(meth, *args)
-          @@options.namespaces.each do |ns|
-            statsd.namespace = ns
+          namespaces = @@options.namespaces
+
+          if namespaces.empty?
             statsd.__send__(meth, *args)
+          else
+            @@options.namespaces.each do |ns|
+              statsd.namespace = ns
+              statsd.__send__(meth, *args)
+            end
           end
         rescue Exception => ex
           if logger = @@options.logger
