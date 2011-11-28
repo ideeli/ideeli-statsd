@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "ideeli-statsd/version"
+require "ideeli/statsd/version"
 
 Gem::Specification.new do |s|
   s.name        = "ideeli-statsd"
-  s.version     = IdeeliStatsd::VERSION
+  s.version     = Ideeli::Statsd::VERSION
   s.authors     = ["patrick brisbin"]
   s.email       = ["pbrisbin@ideeli.com"]
   s.homepage    = "http://github.com/ideeli/ideeli-statsd"
