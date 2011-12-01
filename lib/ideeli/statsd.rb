@@ -3,10 +3,20 @@ require 'statsd'
 module Ideeli
   module Statsd
     class Options
-      attr_accessor :host, :port, :logger
+      attr_accessor :host, :port, :logger, :yaml_file
 
       def namespaces
         @namespaces ||= []
+      end
+
+      def method_missing(meth, *args)
+        key = meth.to_s
+
+        if yaml && yaml.has_key?(key)
+          return yaml[key]
+        end
+
+        nil
       end
 
       private_class_method :new
@@ -15,8 +25,20 @@ module Ideeli
         options = new
         options.host = 'localhost'
         options.port = 8125
+        options.yaml_file = '/etc/statsd_config.yaml'
 
         options
+      end
+
+      private
+
+      def yaml
+        unless @yaml
+          require 'yaml'
+          @yaml = YAML::load( File.open(yaml_file) ) rescue nil
+        end
+
+        @yaml
       end
     end
 

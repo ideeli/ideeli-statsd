@@ -16,12 +16,11 @@ def usage
 
       STATSD_HOST       statsd host to log to
       STATSD_PORT       statsd port to log to
-      NODE_TYPE         the node type used in namespacing
-      RAILS_ENV         used for application in namespacing
+      STATSD_CONFIG     yaml namespace configuration
 
   example:
 
-      STATSD_HOST=statsd.ideeli.com NODE_TYPE=www RAILS_ENV=production statsd-client increment deployment
+      STATSD_HOST=statsd.ideeli.com statsd-client increment deployment
 
   }
 
@@ -49,19 +48,16 @@ rescue => e
 end
 
 Ideeli::Statsd::Client.configure do |conf|
-  conf.host = ENV['STATSD_HOST'] if ENV['STATSD_HOST']
-  conf.port = ENV['STATSD_PORT'] if ENV['STATSD_PORT']
+  conf.host      = ENV['STATSD_HOST'] if ENV['STATSD_HOST']
+  conf.port      = ENV['STATSD_PORT'] if ENV['STATSD_PORT']
+  conf.yaml_file = ENV['STATSD_CONFIG'] if ENV['STATSD_CONFIG']
 
-  # this client is used for events so let's set an appropriate
-  # namespacing
-  #
   # Event metrics
   #   <node-type>.app.<application>.<metric>
-  #   <node-type>.app.event.<something>
   #
-  application = ENV['RAILS_ENV'] ? "ideeli_#{ENV['RAILS_ENV']}" : 'event'
-
-  conf.namespaces << [ENV['NODE_TYPE'], application].compact.join('.')
+  unless (namespaces = [conf.node_type, conf.application].compact).empty?
+    conf.namespaces << namespaces.join('.')
+  end
 end
 
 main

@@ -19,15 +19,15 @@ Add to `config/environment.rb`:
 require 'ideeli/statsd'
 
 Ideeli::Statsd::Client.configure do |conf|
-  conf.host = 'statsd.ideeli.com'
+  conf.host   = 'statsd.ideeli.com'
   conf.logger = Rails.logger
 
-  # derive a specific and aggregate namespace from the environment 
-  # the rails app is running in
+  conf.port      = 8125                      # default value
+  conf.yaml_file = '/etc/statsd_config.yaml' # default value
 
-  node_type   = 'www'
-  fqdn        = Socket.gethostbyname(Socket.gethostname).first rescue nil
-  application = "ideeli_#{Rails.env}" rescue nil
+  node_type   = conf.node_type   # calling an undefined means that 
+  fqdn        = conf.fqdn        # you're referencing a yaml key's value
+  application = conf.application
 
   conf.namespaces << [node_type, 'host', fqdn, application].compact.join('.')
   conf.namespaces << [node_type, 'app', application].compact.join('.')
@@ -55,8 +55,10 @@ end
 
 ### Commandline
 
-    $ STATSD_HOST='statsd.ideeli.com' NODE_TYPE='www' RAILS_ENV='production' \
-        statsd-client increment deployment
+    $ STATSD_HOST='statsd.ideeli.com' statsd-client increment deployment
+
+If a yaml file other than `/etc/statsd_config.yaml`should be used, set 
+`STATSD_CONFIG` as well.
 
 ## Actions
 
