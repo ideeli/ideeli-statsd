@@ -69,6 +69,20 @@ module Ideeli
 
         def configure(&block)
           yield @@options
+
+          # calling an undefined method means that you're referencing a yaml 
+          # key's value. this allows you to add/remove keys in the yaml file and 
+          # simply call on those values for additional namespacing here in 
+          # environment.rb.
+          node_type   = @@options.node_type
+          fqdn        = @@options.fqdn
+          application = @@options.application
+
+          # any metrics will be logged in each of the defined namespaces. 
+          # namespaces defaults to an empty list which would log the metric 
+          # once, un-namespaced.
+          @@options.namespaces << [node_type, 'host', fqdn, application].compact.join('.')
+          @@options.namespaces << [node_type, 'app', application].compact.join('.')
         end
 
         private
