@@ -8,36 +8,24 @@ via a commandline client).
 ## Installation
 
     git clone https://github.com/ideeli/ideeli-statsd
+    cd ideeli-statsd
     bundle install
     rake install
+    cp statsd_config.yaml /etc/statsd_config.yaml
+
+Note that you can place the statsd_config.yaml file elsewhere if you choose and point to it. See the next section.
 
 ### Rails
 
-Add to `config/environment.rb`:
+Add to `config/initializers/statsd.rb`:
 
 ~~~ { .ruby }
+require 'ideeli'
 require 'ideeli/statsd'
 
-Ideeli::Statsd::Client.configure do |conf|
-  conf.host   = 'statsd.ideeli.com'
-  conf.logger = Rails.logger
-
-  conf.port      = 8125                      # default value
-  conf.yaml_file = '/etc/statsd_config.yaml' # default value
-
-  # calling an undefined method means that you're referencing a yaml 
-  # key's value. this allows you to add/remove keys in the yaml file and 
-  # simply call on those values for additional namespacing here in 
-  # environment.rb.
-  node_type   = conf.node_type
-  fqdn        = conf.fqdn
-  application = conf.application
-
-  # any metrics will be logged in each of the defined namespaces. 
-  # namespaces defaults to an empty list which would log the metric 
-  # once, un-namespaced.
-  conf.namespaces << [node_type, 'host', fqdn, application].compact.join('.')
-  conf.namespaces << [node_type, 'app', application].compact.join('.')
+Ideeli::Statsd::Options.configure do |option|
+  option.logger    = Rails.logger
+  option.yaml_file = '/etc/statsd_config.yaml'
 end
 ~~~
 

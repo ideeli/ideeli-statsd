@@ -14,8 +14,6 @@ def usage
 
   environment variables:
 
-      STATSD_HOST       statsd host to log to
-      STATSD_PORT       statsd port to log to
       STATSD_CONFIG     yaml namespace configuration
 
   example:
@@ -47,17 +45,8 @@ rescue => e
   puts e
 end
 
-Ideeli::Statsd::Client.configure do |conf|
-  conf.host      = ENV['STATSD_HOST'] if ENV['STATSD_HOST']
-  conf.port      = ENV['STATSD_PORT'] if ENV['STATSD_PORT']
-  conf.yaml_file = ENV['STATSD_CONFIG'] if ENV['STATSD_CONFIG']
-
-  # Event metrics
-  #   <node-type>.app.<application>.<metric>
-  #
-  unless (namespaces = [conf.node_type, conf.application].compact).empty?
-    conf.namespaces << namespaces.join('.')
-  end
+Ideeli::Statsd::Options.configure do |option|
+  option.yaml_file = ENV['STATSD_CONFIG'] if ENV['STATSD_CONFIG']
 end
 
 main

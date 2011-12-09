@@ -1,3 +1,5 @@
-node_type: www
-fqdn: net.ideeli.fl.prod.uni1
-application: ideeli_production
+node_type:   www
+application: ideeli_development
+fqdn:        localhost
+host:        'localhost' # statsd host
+port:        8125 # statsd port

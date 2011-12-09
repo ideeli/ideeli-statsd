@@ -1,95 +1,80 @@
+require 'singleton'
 require 'statsd'
+require 'yaml'
 
 module Ideeli
   module Statsd
+    # This class is a thin wrapper allowing access to options in the
+    #   ideeli statsd config file.
+    #
+    # It looks for "/etc/statsd_config.yaml" by default.
+    #
+    # Settings may be accessed using the Options class essentially as a namespace. eg.
+    #
+    #     Options.foo
+    #
+    # would return the foo setting
+    #
     class Options
-      attr_accessor :host, :port, :logger, :yaml_file
-
-      def namespaces
-        @namespaces ||= []
+      include Singleton
+      # allows the user to type Class.foo instead of Class.instance.foo
+      def self.method_missing(meth, *args, &block)
+        return self.instance.send(meth, *args, &block)
       end
 
+      # Any non-yamled options should be attributes,
+      #  since missing methods are pulled from the yaml file
+      attr_accessor :logger, :yaml_file, :namespaces
+
+      # Returns the value from the yaml file for the method,
+      #   using it as a key
       def method_missing(meth, *args)
-        key = meth.to_s
-
-        if yaml && yaml.has_key?(key)
-          return yaml[key]
-        end
-
-        nil
+        return yaml[meth.to_s] if yaml
       end
 
-      private_class_method :new
+      def configure(&block)
+        yield self
 
-      def self.defaults
-        options = new
-        options.host = 'localhost'
-        options.port = 8125
-        options.yaml_file = '/etc/statsd_config.yaml'
+        # default for the yaml file location
+        self.yaml_file  ||= '/etc/statsd_config.yaml'
 
-        options
+        # any metrics will be logged in each of the defined namespaces. 
+        self.namespaces ||= []
+        self.namespaces << [node_type, 'host', fqdn, application].compact.join('.')
+        self.namespaces << [node_type, 'app',  application].compact.join('.')
       end
 
       private
 
       def yaml
-        unless @yaml
-          require 'yaml'
-          @yaml = YAML::load( File.open(yaml_file) ) rescue nil
-        end
-
-        @yaml
+        @yaml ||= YAML::load( File.open(yaml_file) ) rescue nil
       end
     end
 
     class Client
       private_class_method :new
 
-      @@options = Options.defaults
-
-      class << self
-        def method_missing(meth, *args)
-          namespaces = @@options.namespaces
-
-          if namespaces.empty?
+      def self.method_missing(meth, *args)
+        if !Options.namespaces || Options.namespaces.empty?
+          statsd.__send__(meth, *args)
+        else
+          Options.namespaces.each do |ns|
+            statsd.namespace = ns
             statsd.__send__(meth, *args)
-          else
-            @@options.namespaces.each do |ns|
-              statsd.namespace = ns
-              statsd.__send__(meth, *args)
-            end
-          end
-        rescue Exception => ex
-          if logger = @@options.logger
-            logger.debug "statsd error: #{ex}"
-          else
-            $stderr.puts "statsd error: #{ex}"
           end
         end
-
-        def configure(&block)
-          yield @@options
-
-          # calling an undefined method means that you're referencing a yaml 
-          # key's value. this allows you to add/remove keys in the yaml file and 
-          # simply call on those values for additional namespacing here in 
-          # environment.rb.
-          node_type   = @@options.node_type
-          fqdn        = @@options.fqdn
-          application = @@options.application
-
-          # any metrics will be logged in each of the defined namespaces. 
-          # namespaces defaults to an empty list which would log the metric 
-          # once, un-namespaced.
-          @@options.namespaces << [node_type, 'host', fqdn, application].compact.join('.')
-          @@options.namespaces << [node_type, 'app', application].compact.join('.')
+      rescue Exception => ex
+        if logger = Options.logger
+          logger.debug "statsd error: #{ex}"
+        else
+          $stderr.puts "statsd error: #{ex}"
         end
+      end
 
-        private
+      private
 
-        def statsd
-          @@statsd ||= ::Statsd.new(@@options.host, @@options.port)
-        end
+      def self.statsd
+        @@statsd ||= ::Statsd.new(Options.host, Options.port)
       end
     end
   end
