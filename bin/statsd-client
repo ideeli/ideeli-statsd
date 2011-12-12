@@ -14,11 +14,7 @@ def usage
 
   environment variables:
 
-      STATSD_CONFIG     yaml namespace configuration
-
-  example:
-
-      STATSD_HOST=statsd.ideeli.com statsd-client increment deployment
+      STATSD_CONFIG     alternate configuration file location
 
   }
 
