@@ -13,7 +13,8 @@ via a commandline client).
     rake install
     cp statsd_config.yaml /etc/statsd_config.yaml
 
-Note that you can place the statsd_config.yaml file elsewhere if you choose and point to it. See the next section.
+Note that you can place the statsd_config.yaml file elsewhere if you 
+choose and point to it. See the next section.
 
 ### Rails
 
@@ -50,12 +51,13 @@ end
 
 ### Commandline
 
-    $ STATSD_HOST='statsd.ideeli.com' statsd-client increment deployment
+    $ statsd-client increment deployment
 
-If a yaml file other than `/etc/statsd_config.yaml`should be used, set 
-`STATSD_CONFIG` as well. The commandline app will namespace metrics as 
-`<node_type>.app.<application>` pulling the varying components from the 
-defined yaml file.
+If a yaml file other than `/etc/statsd_config.yaml` should be used, set 
+the `STATSD_CONFIG` environment variables.
+
+The commandline app will namespace metrics as 
+`<node_type>.app.<application>`.
 
 ## Actions
 
