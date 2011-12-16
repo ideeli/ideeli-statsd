@@ -54,13 +54,13 @@ module Ideeli
     class Client
       private_class_method :new
 
-      def self.method_missing(meth, *args)
+      def self.method_missing(meth, *args, &block)
         if !Options.namespaces || Options.namespaces.empty?
-          statsd.__send__(meth, *args)
+          statsd.__send__(meth, *args, &block)
         else
           Options.namespaces.each do |ns|
             statsd.namespace = ns
-            statsd.__send__(meth, *args)
+            statsd.__send__(meth, *args, &block)
           end
         end
       rescue Exception => ex
