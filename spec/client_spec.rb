@@ -1,8 +1,6 @@
 require 'ideeli/statsd'
 
 describe Ideeli::Statsd::Client do
-  #  [:increment,:decrement,:count,:timing,:time,:guage].each do |meth|
-
   before do
     Ideeli::Statsd::Options.configure do |conf|
       conf.yaml_file  = './statsd_config.yaml'
@@ -36,13 +34,13 @@ describe Ideeli::Statsd::Client do
   end
 
   it "should delegate time in each namespace" do
-    # TODO: should_yield
+    # TODO: test should_yield somehow
     @statsd.should_receive(:time).with('foo', 10).twice
     Ideeli::Statsd::Client.time('foo', 10)
   end
 
-  it "should delegate guage in each namespace" do
-    @statsd.should_receive(:guage).with('foo', 500, 10).twice
-    Ideeli::Statsd::Client.guage('foo', 500, 10)
+  it "should delegate gauge in each namespace" do
+    @statsd.should_receive(:gauge).with('foo', 500, 10).twice
+    Ideeli::Statsd::Client.gauge('foo', 500, 10)
   end
 end

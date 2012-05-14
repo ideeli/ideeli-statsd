@@ -2,7 +2,7 @@ require 'ideeli/statsd'
 
 describe Ideeli::Statsd::Options do
   it "should have defaults" do
-    Ideeli::Statsd::Options.configure { }
+    Ideeli::Statsd::Options.configure
 
     Ideeli::Statsd::Options.yaml_file.should eq('/etc/statsd_config.yaml')
     Ideeli::Statsd::Options.namespaces.should include('host') # other components nil
