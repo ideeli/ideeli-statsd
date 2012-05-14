@@ -1,5 +1,6 @@
-require 'statsd'
 require 'forwardable'
+require 'resolv'
+require 'statsd'
 
 module Ideeli
   module Statsd
@@ -39,7 +40,7 @@ module Ideeli
         private
 
         def statsd
-          @statsd ||= ::Statsd.new(Options.host, Options.port)
+          @statsd ||= ::Statsd.new(Resolv.getaddress(Options.host), Options.port)
         end
       end
 
