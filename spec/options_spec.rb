@@ -30,7 +30,7 @@ describe Ideeli::Statsd::Options do
     Ideeli::Statsd::Options.node_type.should eq('www')
     Ideeli::Statsd::Options.application.should eq('ideeli_development')
     Ideeli::Statsd::Options.fqdn.should eq('localhost')
-    Ideeli::Statsd::Options.host.should eq('localhost')
+    Ideeli::Statsd::Options.host.should eq('127.0.0.1')
     Ideeli::Statsd::Options.port.should eq(8125)
   end
 end

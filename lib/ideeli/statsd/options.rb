@@ -17,8 +17,8 @@ module Ideeli
           :namespaces, :host, :port, :node_type, :fqdn, :application
       end
 
-      # exceptions will be loged with the debug method on this object if
-      # present, otherwise they will go to stderr.
+      # exceptions will be logged with the debug method on this object
+      # if present, otherwise they will go to stderr.
       attr_accessor :logger
 
       # host-specific options are read from this yaml file. the default
@@ -34,8 +34,6 @@ module Ideeli
       # connection info and host qualifications.
       attr_accessor :host, :port, :node_type, :fqdn, :application
       
-      private_class_method :new
-
       def configure(&block)
         yield self if block_given?
 
