@@ -1,5 +1,5 @@
 node_type:   www
 application: ideeli_development
 fqdn:        localhost
-host:        'localhost' # statsd host
+host:        '127.0.0.1' # statsd host
 port:        8125 # statsd port
