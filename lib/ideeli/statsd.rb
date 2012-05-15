@@ -9,7 +9,6 @@ module Ideeli
                          :decrement,
                          :count,
                          :timing,
-                         :time,
                          :gauge ]
 
       class << self
@@ -21,6 +20,18 @@ module Ideeli
               delegate_to_statsd(#{method.inspect}, *args, &block)
             end
           ]
+        end
+
+        # time must be handled specially so we can record the value in
+        # multiple namespaces but only run the block of code once.
+        def time(stat, sample_rate = 1)
+          start = ::Time.now
+
+          yield
+
+        ensure
+          # delegated, occurs in each namespace
+          timing(stat, ((::Time.now - start) * 1000).round, sample_rate)
         end
 
         attr_accessor :logger, :yaml_file, :host, :port, :namespaces

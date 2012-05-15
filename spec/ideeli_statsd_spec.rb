@@ -88,15 +88,20 @@ describe Ideeli::Statsd::Client do
     Ideeli::Statsd::Client.gauge('foo', 500, 10)
   end
 
-  # TODO: only yield block once no matter how many namespaces
-  it "should delegate time in each namespace" do
-    a_block = lambda { true }
+  it "should delegate time in each namespace but only call the block once" do
+    @statsd.should_receive(:timing).twice
 
-    @statsd.should_receive(:time).with('foo', 10, &a_block).twice
-    Ideeli::Statsd::Client.time('foo', 10, &a_block)
+    i = 0
+    ret = Ideeli::Statsd::Client.time('foo', 10) do
+      i += 1
+      :retval
+    end
+
+    i.should eq(1)
+    ret.should eq(:retval)
   end
 
-  it "shoudl use a logger" do
+  it "should use a logger" do
     logger = double("logger")
     logger.should_receive(:error)
 
