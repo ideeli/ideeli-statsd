@@ -16,8 +16,7 @@ describe Ideeli::Statsd::Client, "configure" do
     Ideeli::Statsd::Client.host.should be_nil
     Ideeli::Statsd::Client.port.should be_nil
     Ideeli::Statsd::Client.yaml_file.should eq('/etc/statsd_config.yaml')
-    Ideeli::Statsd::Client.namespaces.should include('host') # other components nil
-    Ideeli::Statsd::Client.namespaces.should include('app')  # other components nil
+    Ideeli::Statsd::Client.namespaces.should be_empty
   end
 
   it "can be configured" do

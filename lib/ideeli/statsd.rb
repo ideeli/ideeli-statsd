@@ -14,7 +14,7 @@ module Ideeli
 
       class << self
 
-        # Define a delegator method for each valid statsd calls.
+        # define a delegator method for each valid statsd calls.
         STATSD_METHODS.each do |method|
           class_eval %[
             def #{method}(*args, &block)
@@ -28,29 +28,25 @@ module Ideeli
         def configure
           yield self if block_given?
 
-          self.yaml_file ||= '/etc/statsd_config.yaml'
+          # some defaults
+          self.yaml_file  ||= '/etc/statsd_config.yaml'
+          self.namespaces ||= []
 
+          # further configured via the yaml file
           if yaml = YAML::load(File.open(self.yaml_file)) rescue nil
             self.host ||= yaml['host']
             self.port ||= yaml['port']
 
-            # yaml attributes used to create the namespaces
-            node_type   = yaml['node_type']
-            fqdn        = yaml['fqdn']
-            application = yaml['application']
-          else
-            node_type = fqdn = application = nil
+            add_default_namespaces(yaml)
           end
 
-          # add the default namespaces
-          self.namespaces ||= []
-          self.namespaces << [node_type, 'host', fqdn, application].compact.join('.')
-          self.namespaces << [node_type, 'app',  application].compact.join('.')
         end
 
         def statsd
           @statsd ||= ::Statsd.new(Resolv.getaddress(host || '127.0.0.1'), port || 8125)
         end
+
+        private
 
         def delegate_to_statsd(method, *args, &block)
           if namespaces && namespaces.any?
@@ -68,6 +64,15 @@ module Ideeli
           else
             $stderr.puts "statsd error: #{ex}"
           end
+        end
+
+        def add_default_namespaces(yaml)
+          node_type   = yaml['node_type']
+          fqdn        = yaml['fqdn']
+          application = yaml['application']
+
+          self.namespaces << [node_type, 'host', fqdn, application].compact.join('.')
+          self.namespaces << [node_type, 'app',  application].compact.join('.')
         end
 
       end
