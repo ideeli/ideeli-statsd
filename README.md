@@ -24,7 +24,7 @@ Add to `config/initializers/statsd.rb`:
 require 'ideeli'
 require 'ideeli/statsd'
 
-Ideeli::Statsd::Options.configure do |option|
+Ideeli::Statsd::Client.configure do |option|
   option.logger    = Rails.logger
   option.yaml_file = '/etc/statsd_config.yaml'
 end

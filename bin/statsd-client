@@ -41,7 +41,7 @@ rescue => e
   puts e
 end
 
-Ideeli::Statsd::Options.configure do |option|
+Ideeli::Statsd::Client.configure do |option|
   option.yaml_file = ENV['STATSD_CONFIG'] if ENV['STATSD_CONFIG']
 end
 
